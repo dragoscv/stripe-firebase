@@ -37,7 +37,8 @@ export type {
   PriceIdLineItemParams,
   PriceIdSessionCreateParams,
   Session,
-  SessionCreateParams
+  SessionCreateParams,
+  SessionConfig
 } from "./session";
 
 export {

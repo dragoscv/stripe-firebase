@@ -41,6 +41,8 @@ export interface StripePaymentsOptions {
   productsCollection: string;
 }
 
+
+
 type Components = Record<string, unknown>;
 
 /**

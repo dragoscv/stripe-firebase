@@ -39,6 +39,18 @@ import {
   checkPositiveNumber,
 } from "./utils";
 
+export interface SessionConfig {
+  firebaseApp: FirebaseApp;
+  priceId: string;
+  promoCode?: string;
+  metadata?: Record<string, unknown>;
+  trial_period_days?: number;
+  payment_mode?: "subscription" | "payment";
+  currency: string;
+  priceValue: number;
+  subscriptionName: string;
+}
+
 /**
  * Parameters common across all session types.
  */
