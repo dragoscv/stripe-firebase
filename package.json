@@ -1,6 +1,6 @@
 {
   "name": "stripe-firebase",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "This is library for stripe and firebase. Forked and updated to include trial days",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,18 +19,15 @@
     "type": "git",
     "url": "https://github.com/dragoscv/stripe-firebase.git"
   },
+  "dependencies": {
+    "tslib": "^2.8.1"
+  },
+  "peerDependencies": {
+    "firebase": "^11.0.2"
+  },
   "devDependencies": {
     "@types/node": "^22.10.1",
     "esbuild": "^0.24.0",
     "typescript": "^5.7.2"
-  },
-  "dependencies": {
-    "firebase": "^11.0.2",
-    "tslib": "^2.8.1"
-  },
-  "overrides": {
-    "@firebase/app": "0.9.25",
-    "@firebase/auth": "1.5.1",
-    "@firebase/firestore": "4.4.0"
   }
 }
