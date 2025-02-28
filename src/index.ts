@@ -81,5 +81,13 @@ export {
   SubscriptionStatus
 } from "./subscription";
 
-export * from "./utils";
+export {
+  stripePayments,
+  newCheckoutSession
+} from "./utils";
+
+export {
+  StripeFirebaseProvider,
+  StripeFirebaseContext
+} from "./provider";
 
