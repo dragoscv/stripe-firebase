@@ -1,7 +1,7 @@
 {
   "name": "stripe-firebase",
   "version": "1.0.0",
-  "description": "Repository of Firebase extensions edited by Dragos Catalin (forked from Invertase).",
+  "description": "Repository of Firebase extensions edited by Dragos Catalin (forked from Invertase because they don't update).",
   "private": true,
   "scripts": {
     "format": "prettier --write \"**/*.{js,md,yml,ts,json,yaml}\"",
