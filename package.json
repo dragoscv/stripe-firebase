@@ -1,42 +1,37 @@
 {
   "name": "stripe-firebase",
-  "version": "0.3.3",
-  "description": "This is library for stripe and firebase. Forked and updated to include trial days",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "version": "1.0.0",
+  "description": "Repository of Firebase extensions edited by Dragos Catalin (forked from Invertase).",
+  "private": true,
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublishOnly": "npm run build",
-    "publishOnly": "npm publish --access public",
-    "publish": "npm publish --access public"
+    "format": "prettier --write \"**/*.{js,md,yml,ts,json,yaml}\"",
+    "lint": "prettier --list-different \"**/*.{js,md,yml,ts,json,yaml}\"",
+    "clean": "lerna run --parallel clean",
+    "build": "lerna run --parallel build",
+    "postinstall": "lerna bootstrap --no-ci && npm run clean && npm run build",
+    "generate-readmes": "lerna run --parallel generate-readme",
+    "dev": "cd $npm_config_ext/ && firebase ext:dev:emulators:start --test-params=../.env --project=$npm_config_project",
+    "dev:invoices": "npm run dev --ext=firebase-stripe-invoices --project=stripe-subs-ext",
+    "dev:subs": "npm run dev --ext=firebase-stripe-payments --project=stripe-subs-ext",
+    "ext:install": "npm run build && firebase ext:install ./$npm_config_ext/ --params=.env --project=$npm_config_project",
+    "ext:update": "npm run build && firebase ext:update $npm_config_ext ./$npm_config_ext/ --project=$npm_config_project",
+    "ext:uninstall": "firebase ext:uninstall $npm_config_ext --project=$npm_config_project",
+    "test": "lerna run test --stream --concurrency 1"
   },
-  "keywords": [
-    "stripe",
-    "firebase"
-  ],
-  "author": "Dragos Catalin (https://github.com/dragoscv)",
-  "license": "ISC",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dragoscv/stripe-firebase.git"
   },
-  "dependencies": {
-    "firewand": "^0.1.2",
-    "tslib": "^2.8.1"
-  },
-  "peerDependencies": {
-    "firebase": "^11.0.2",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+  "author": "Dragos Catalin (https://dragoscatalin.ro/)",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/dragoscv/stripe-firebase/issues"
   },
   "devDependencies": {
-    "@types/node": "^22.10.1",
-    "@types/react": "^19.0.10",
-    "esbuild": "^0.24.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "typescript": "^5.7.2"
+    "lerna": "^3.4.3",
+    "prettier": "^3.2.5"
+  },
+  "dependencies": {
+    "rimraf": "^3.0.2"
   }
 }

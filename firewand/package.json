@@ -1,0 +1,79 @@
+{
+  "name": "firewand",
+  "version": "0.5.20",
+  "description": "Firewand is a modular Firebase utility library for simplifying interactions with Firebase services such as Analytics, Auth, Firestore, Storage, and Stripe payments.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./web": {
+      "require": "./dist/web.js",
+      "import": "./dist/web.js",
+      "types": "./dist/web.d.ts"
+    },
+    "./native": {
+      "require": "./dist/native.js",
+      "import": "./dist/native.js",
+      "types": "./dist/native.d.ts"
+    }
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "prepublishOnly": "npm run build",
+    "ppublish": "npm run build && npm publish --access public"
+  },
+  "keywords": [
+    "stripe",
+    "firebase"
+  ],
+  "author": "Dragos Catalin (https://github.com/dragoscv)",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dragoscv/firewand.git"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.1",
+    "@types/react": "^19.0.10",
+    "esbuild": "^0.24.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.6",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "btpay": "^0.2.0",
+    "tslib": "^2.8.1",
+    "uuid": "^11.1.0"
+  },
+  "optionalDependencies": {
+    "@react-native-async-storage/async-storage": "^1.23.1",
+    "expo-constants": "^17.0.8",
+    "@stripe/stripe-react-native": "^0.43.0",
+    "@firebase/auth": "^1.9.1"
+  },
+  "peerDependencies": {
+    "firebase": ">=11.6.0",
+    "react": ">=16.8.0"
+  },
+  "peerDependenciesMeta": {
+    "react-native": {
+      "optional": true
+    },
+    "expo-router": {
+      "optional": true
+    },
+    "expo-linking": {
+      "optional": true
+    }
+  }
+}

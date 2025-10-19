@@ -1,0 +1,23 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Environment variables
+.env
+
+# Firebase logs
+firebase-debug.log
+
+# Build directories
+dist/
+build/
+
+# OS generated files
+.DS_Store
+Thumbs.db

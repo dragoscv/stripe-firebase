@@ -1,0 +1,7 @@
+{
+  "packages": [
+    "*",
+    "firebase-stripe-invoices/functions"
+  ],
+  "version": "0.0.0"
+}
