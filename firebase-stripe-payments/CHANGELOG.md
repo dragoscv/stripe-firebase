@@ -1,3 +1,13 @@
+## Version 1.0.0 - 2025-10-19
+
+[feat] - Stable release of Firebase Stripe Payments extension
+
+[chore] - Forked from Invertase repository for continued maintenance and updates
+
+[fix] - Updated extension metadata and publisher information
+
+[docs] - Updated documentation and setup instructions
+
 ## Version 0.3.12 - 2025-05-06
 
 [docs] - update firebase snippets to v9 syntax
