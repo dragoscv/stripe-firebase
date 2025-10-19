@@ -1,3 +1,22 @@
+````markdown
+## Version 1.0.1 - 2025-10-19
+
+[feat] - Updated Firebase libraries to latest versions (firebase-admin@^13.5.0, firebase-functions@^6.5.0)
+
+[feat] - Updated Stripe library to v19.1.0 with latest Stripe API version support
+
+[feat] - Added new Cloud Functions for enhanced customer and subscription lifecycle management:
+  - `onCustomerCreated`: Executes when a customer is created, updates customerCount stats
+  - `onCustomerDeleted`: Executes when a customer is deleted, updates customerCount stats
+  - `onCustomerSubscriptionCreated`: Executes when a subscription is created, updates subscriptionCount stats
+  - `onCustomerSubscriptionCanceled`: Executes when a subscription is canceled via Stripe API
+
+[feat] - Added `preferred_locales` support to CustomerData interface for better internationalization
+
+[fix] - Fixed stable version publishing command by removing incorrect leading slash from --root parameter
+
+[chore] - Updated TypeScript to v5.9.3 for improved type safety and performance
+
 ## Version 1.0.0 - 2025-10-19
 
 [feat] - Stable release of Firebase Stripe Payments extension

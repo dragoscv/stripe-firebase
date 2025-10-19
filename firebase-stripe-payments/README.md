@@ -1,8 +1,28 @@
 # Run Payments with Stripe
 
-**Author**: Invertase (**[https://invertase.io](https://invertase.io)**)
+**Author**: Dragos Catalin (**[https://dragoscatalin.ro](https://dragoscatalin.ro)**)
+
+**Original Author**: Invertase (**[https://invertase.io](https://invertase.io)**)
 
 **Description**: Controls access to paid content by syncing your one-time and recurring payments with Firebase Authentication.
+
+**Version**: 1.0.1 | **Updated**: October 19, 2025
+
+## 🎉 What's New in Version 1.0.1
+
+- ✅ **Updated Firebase libraries** to latest versions (firebase-admin@^13.5.0, firebase-functions@^6.5.0)
+- ✅ **Updated Stripe SDK** to v19.1.0 with latest API support
+- ✅ **New Cloud Functions** for customer and subscription lifecycle management:
+  - `onCustomerCreated` - Track customer creation events
+  - `onCustomerDeleted` - Track customer deletion events
+  - `onCustomerSubscriptionCreated` - Track new subscriptions
+  - `onCustomerSubscriptionCanceled` - Programmatic subscription cancellation
+- ✅ **Enhanced internationalization** with `preferred_locales` support
+- ✅ **Updated TypeScript** to v5.9.3 for better performance and type safety
+
+See [IMPROVEMENTS.md](./IMPROVEMENTS.md) for detailed information about all improvements.
+
+---
 
 **Details**: Use this extension as a backend for your [Stripe](https://www.stripe.com/) payments.
 
@@ -114,6 +134,14 @@ Starting August 17 2020, you will be billed a small amount (typically less than 
 - **onUserDeleted:** Deletes the Stripe customer object and cancels all their subscriptions when the user is deleted in Firebase Authentication.
 
 - **onCustomerDataDeleted:** Deletes the Stripe customer object and cancels all their subscriptions when the customer doc in Cloud Firestore is deleted.
+
+- **onCustomerCreated:** _(New in v1.0.1)_ Executes when a customer is created, updates customerCount stats for analytics.
+
+- **onCustomerDeleted:** _(New in v1.0.1)_ Executes when a customer is deleted, updates customerCount stats for analytics.
+
+- **onCustomerSubscriptionCreated:** _(New in v1.0.1)_ Executes when a subscription is created, updates subscriptionCount stats.
+
+- **onCustomerSubscriptionCanceled:** _(New in v1.0.1)_ HTTPS callable function for programmatic subscription cancellation via Stripe API.
 
 **Access Required**:
 
