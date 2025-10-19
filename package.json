@@ -16,6 +16,8 @@
     "ext:install": "npm run build && firebase ext:install ./$npm_config_ext/ --params=.env --project=$npm_config_project",
     "ext:update": "npm run build && firebase ext:update $npm_config_ext ./$npm_config_ext/ --project=$npm_config_project",
     "ext:uninstall": "firebase ext:uninstall $npm_config_ext --project=$npm_config_project",
+    "ext:publish:payments": "npm run build && cd firebase-stripe-payments && firebase ext:dev:upload dragoscv/firebase-stripe-payments --local",
+    "ext:publish:payments:stable": "npm run build && cd firebase-stripe-payments && firebase ext:dev:upload dragoscv/firebase-stripe-payments --repo=https://github.com/dragoscv/stripe-firebase --root=/firebase-stripe-payments --ref=main --stage=stable",
     "test": "lerna run test --stream --concurrency 1"
   },
   "repository": {
