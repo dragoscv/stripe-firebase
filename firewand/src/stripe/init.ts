@@ -39,6 +39,12 @@ export function getStripePayments(
 export interface StripePaymentsOptions {
   customersCollection: string;
   productsCollection: string;
+  /**
+   * The Firebase Functions region where the extension is deployed.
+   * Defaults to 'us-central1' if not specified.
+   * Common values: 'us-central1', 'europe-west1', 'asia-northeast1', etc.
+   */
+  functionsRegion?: string;
 }
 
 
@@ -80,6 +86,14 @@ export class StripePayments {
    */
   get productsCollection(): string {
     return this.options.productsCollection;
+  }
+
+  /**
+   * Firebase Functions region where the extension is deployed.
+   * Defaults to 'us-central1' if not configured.
+   */
+  get functionsRegion(): string {
+    return this.options.functionsRegion || 'us-central1';
   }
 
   /**

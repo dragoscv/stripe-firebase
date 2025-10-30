@@ -20,7 +20,6 @@ import { StripePayments, StripePaymentsError } from "./init";
 import { getCurrentUser } from "./user";
 import { checkNonEmptyString } from "./utils";
 import { firebaseApp } from "../firebase";
-import { functionsRegion } from "../firebase/utils";
 
 /**
  * Parameters for creating a billing portal session.
@@ -296,10 +295,10 @@ export async function createPortalLink(
     );
   }
 
-  const functions: Functions = getFunctions(firebaseApp, functionsRegion);
+  // Use the region configured in StripePayments, not the global default
+  const functions: Functions = getFunctions(firebaseApp, payments.functionsRegion);
   
   // Extension functions are prefixed with "ext-{extension-name}-"
-  // Try both the direct name and the extension-prefixed name
   const functionName = "ext-firebase-stripe-payments-createPortalLink";
   
   const createPortalLinkFn = httpsCallable<CreatePortalLinkParams, PortalLink>(
