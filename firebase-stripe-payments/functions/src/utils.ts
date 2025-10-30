@@ -348,19 +348,37 @@ export const insertInvoiceRecord = async (invoice: Stripe.Invoice) => {
       .set(invoice);
   }
 
-  const prices = [];
+  const prices: admin.firestore.DocumentReference[] = [];
   for (const item of invoice.lines.data) {
-    prices.push(
-      // @ts-ignore
-      admin
-        .firestore()
-        .collection(config.productsCollectionPath)
-        // @ts-ignore
-        .doc(item.price.product as string)
-        .collection('prices')
-        // @ts-ignore
-        .doc(item.price.id),
-    );
+    // Handle new Stripe API structure: pricing.price_details or legacy price object
+    const pricing = (item as any).pricing;
+    const price = (item as any).price;
+    
+    let productId: string | undefined;
+    let priceId: string | undefined;
+    
+    if (pricing?.price_details) {
+      // New API structure (2025-08-27.basil+)
+      productId = pricing.price_details.product;
+      priceId = pricing.price_details.price;
+    } else if (price) {
+      // Legacy API structure
+      productId = typeof price.product === 'string' ? price.product : price.product?.id;
+      priceId = price.id;
+    }
+    
+    if (productId && priceId) {
+      prices.push(
+        admin
+          .firestore()
+          .collection(config.productsCollectionPath)
+          .doc(productId)
+          .collection('prices')
+          .doc(priceId),
+      );
+    } else {
+      console.warn(`Skipping invoice line item without product/price: ${item.id}`);
+    }
   }
 
   // An Invoice object does not always have an associated Payment Intent
@@ -396,19 +414,37 @@ export const insertPaymentRecord = async (
     const lineItems = await stripe.checkout.sessions.listLineItems(
       checkoutSession.id,
     );
-    const prices = [];
+    const prices: admin.firestore.DocumentReference[] = [];
     for (const item of lineItems.data) {
-      prices.push(
-        // @ts-ignore
-        admin
-          .firestore()
-          .collection(config.productsCollectionPath)
-          // @ts-ignore
-          .doc(item.price.product as string)
-          .collection('prices')
-          // @ts-ignore
-          .doc(item.price.id),
-      );
+      // Handle new Stripe API structure: pricing.price_details or legacy price object
+      const pricing = (item as any).pricing;
+      const price = (item as any).price;
+      
+      let productId: string | undefined;
+      let priceId: string | undefined;
+      
+      if (pricing?.price_details) {
+        // New API structure (2025-08-27.basil+)
+        productId = pricing.price_details.product;
+        priceId = pricing.price_details.price;
+      } else if (price) {
+        // Legacy API structure
+        productId = typeof price.product === 'string' ? price.product : price.product?.id;
+        priceId = price.id;
+      }
+      
+      if (productId && priceId) {
+        prices.push(
+          admin
+            .firestore()
+            .collection(config.productsCollectionPath)
+            .doc(productId)
+            .collection('prices')
+            .doc(priceId),
+        );
+      } else {
+        console.warn(`Skipping checkout line item without product/price: ${item.id}`);
+      }
     }
     payment['prices'] = prices;
     payment['items'] = lineItems.data;

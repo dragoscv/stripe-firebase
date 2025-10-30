@@ -1,4 +1,14 @@
 ````markdown
+## Version 1.0.3 - 2025-10-30
+
+[fix] - Fixed critical invoice webhook handler errors: "Cannot read properties of undefined (reading 'product')"
+  - Updated `insertInvoiceRecord` to handle new Stripe API invoice line item structure (API version 2025-08-27.basil+)
+  - Updated `insertPaymentRecord` to handle new checkout session line item structure
+  - Line items now use nested `pricing.price_details` structure instead of direct `price.product` access
+  - Maintains backward compatibility with legacy API structure
+  - Affects webhook events: `invoice.paid`, `invoice.payment_succeeded`, `invoice.payment_failed`, and all invoice-related events
+  - Added fallback handling and warning logs for line items without product/price data
+
 ## Version 1.0.2 - 2025-10-30
 
 [fix] - Fixed critical webhook handler error: "Value for argument 'seconds' is not a valid integer"
