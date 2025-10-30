@@ -28,3 +28,8 @@ This repository includes the source code for the following extensions:
 1. Send invoices using Stripe
     - [Homepage](https://firebase.google.com/products/extensions/firebase-stripe-invoices)
     - [Source code](./firebase-stripe-invoices)
+
+## Install the Extensions
+Extension: dragoscv/firebase-stripe-payments@1.0.1
+Install Link: https://console.firebase.google.com/project/_/extensions/install?ref=dragoscv/firebase-stripe-payments@1.0.1
+Console View: https://console.firebase.google.com/project/dragoscv-688bd/publisher/extensions/firebase-stripe-payments/v/1.0.1

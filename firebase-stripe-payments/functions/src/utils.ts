@@ -29,6 +29,32 @@ import Stripe from 'stripe';
 import { Timestamp } from 'firebase-admin/firestore';
 
 /**
+ * Safely converts a Stripe unix timestamp (in seconds) to a Firestore Timestamp.
+ * Handles edge cases where the timestamp might be null, undefined, or not a valid integer.
+ * @param unixTimestamp - Unix timestamp in seconds from Stripe API
+ * @returns Firestore Timestamp or null if invalid
+ */
+const safeTimestamp = (unixTimestamp: number | null | undefined): Timestamp | null => {
+  if (unixTimestamp === null || unixTimestamp === undefined) {
+    return null;
+  }
+  // Ensure the value is a valid number and positive
+  const timestamp = Number(unixTimestamp);
+  if (!Number.isFinite(timestamp) || timestamp < 0) {
+    console.warn(`Invalid timestamp value: ${unixTimestamp}`);
+    return null;
+  }
+  // Round to integer to handle floating point values
+  const integerTimestamp = Math.floor(timestamp);
+  try {
+    return Timestamp.fromMillis(integerTimestamp * 1000);
+  } catch (error) {
+    console.error(`Error converting timestamp ${unixTimestamp}:`, error);
+    return null;
+  }
+};
+
+/**
  * Prefix Stripe metadata keys with `stripe_metadata_` to be spread onto Product and Price docs in Cloud Firestore.
  */
 export const prefixMetadata = (metadata: object) =>
@@ -182,28 +208,14 @@ export const manageSubscriptionStatusChange = async (
     quantity: subscription.items.data[0].quantity ?? null,
     items: subscription.items.data,
     cancel_at_period_end: subscription.cancel_at_period_end,
-    cancel_at: subscription.cancel_at
-      ? Timestamp.fromMillis(subscription.cancel_at * 1000)
-      : null,
-    canceled_at: subscription.canceled_at
-      ? Timestamp.fromMillis(subscription.canceled_at * 1000)
-      : null,
-    current_period_start: Timestamp.fromMillis(
-      (subscription as any).current_period_start * 1000,
-    ),
-    current_period_end: Timestamp.fromMillis(
-      (subscription as any).current_period_end * 1000,
-    ),
-    created: Timestamp.fromMillis((subscription as any).created * 1000),
-    ended_at: subscription.ended_at
-      ? Timestamp.fromMillis(subscription.ended_at * 1000)
-      : null,
-    trial_start: subscription.trial_start
-      ? Timestamp.fromMillis(subscription.trial_start * 1000)
-      : null,
-    trial_end: subscription.trial_end
-      ? Timestamp.fromMillis(subscription.trial_end * 1000)
-      : null,
+    cancel_at: safeTimestamp(subscription.cancel_at),
+    canceled_at: safeTimestamp(subscription.canceled_at),
+    current_period_start: safeTimestamp((subscription as any).current_period_start) || Timestamp.now(),
+    current_period_end: safeTimestamp((subscription as any).current_period_end) || Timestamp.now(),
+    created: safeTimestamp((subscription as any).created) || Timestamp.now(),
+    ended_at: safeTimestamp(subscription.ended_at),
+    trial_start: safeTimestamp(subscription.trial_start),
+    trial_end: safeTimestamp(subscription.trial_end),
   };
   await subsDbRef.set(subscriptionData);
 

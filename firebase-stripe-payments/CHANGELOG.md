@@ -1,4 +1,13 @@
 ````markdown
+## Version 1.0.2 - 2025-10-30
+
+[fix] - Fixed critical webhook handler error: "Value for argument 'seconds' is not a valid integer"
+  - Added `safeTimestamp()` helper function to properly validate Stripe unix timestamps before conversion
+  - All subscription timestamps now use safe validation (created, current_period_start, current_period_end, cancel_at, etc.)
+  - Handles edge cases: null/undefined values, non-integer floats, negative timestamps
+  - Comprehensive error handling prevents webhook processing failures
+  - Affects all Stripe events with timestamps: checkout.session.completed, customer.subscription.*, invoices, payment intents
+
 ## Version 1.0.1 - 2025-10-19
 
 [feat] - Updated Firebase libraries to latest versions (firebase-admin@^13.5.0, firebase-functions@^6.5.0)
