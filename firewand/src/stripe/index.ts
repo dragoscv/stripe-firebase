@@ -83,6 +83,16 @@ export type {
   SubscriptionStatus
 } from "./subscription";
 
+export {
+  CREATE_PORTAL_LINK_TIMEOUT_MILLIS,
+  createPortalLink
+} from "./portal";
+export type {
+  CreatePortalLinkOptions,
+  CreatePortalLinkParams,
+  PortalLink
+} from "./portal";
+
 export * from "./utils";
 
 

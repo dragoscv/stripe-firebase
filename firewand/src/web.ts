@@ -18,6 +18,8 @@ import {
     getCurrentUserSubscription,
     getCurrentUserSubscriptions,
     onCurrentUserSubscriptionUpdate,
+    CREATE_PORTAL_LINK_TIMEOUT_MILLIS,
+    createPortalLink,
     stripePayments,
 } from "./stripe";
 
@@ -54,6 +56,8 @@ export {
     getCurrentUserSubscription,
     getCurrentUserSubscriptions,
     onCurrentUserSubscriptionUpdate,
+    CREATE_PORTAL_LINK_TIMEOUT_MILLIS,
+    createPortalLink,
     stripePayments
 };
 
