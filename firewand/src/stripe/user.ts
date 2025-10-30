@@ -64,12 +64,10 @@ class FirebaseAuthUserDAO implements UserDAO {
   public getCurrentUser(): string {
     const currentUser: string | undefined = this.auth.currentUser?.uid;
     if (!currentUser) {
-      const newError = new StripePaymentsError(
+      throw new StripePaymentsError(
         "unauthenticated",
         "Failed to determine currently signed in user. User not signed in."
       );
-      // console.error(newError);
-      return "";
     }
 
     return currentUser;
