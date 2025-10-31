@@ -186,6 +186,12 @@ export const manageSubscriptionStatusChange = async (
   const subsDbRef = customersSnap.docs[0].ref
     .collection('subscriptions')
     .doc(subscription.id);
+  
+  // Extract period dates from subscription items (not top-level subscription object)
+  const firstItem = subscription.items.data[0];
+  const currentPeriodStart = safeTimestamp((firstItem as any).current_period_start) ?? Timestamp.now();
+  const currentPeriodEnd = safeTimestamp((firstItem as any).current_period_end) ?? Timestamp.now();
+  
   // Update with new Subscription status
   const subscriptionData: Subscription = {
     metadata: subscription.metadata,
@@ -210,9 +216,9 @@ export const manageSubscriptionStatusChange = async (
     cancel_at_period_end: subscription.cancel_at_period_end,
     cancel_at: safeTimestamp(subscription.cancel_at),
     canceled_at: safeTimestamp(subscription.canceled_at),
-    current_period_start: safeTimestamp((subscription as any).current_period_start) ?? Timestamp.now(),
-    current_period_end: safeTimestamp((subscription as any).current_period_end) ?? Timestamp.now(),
-    created: safeTimestamp((subscription as any).created) ?? Timestamp.now(),
+    current_period_start: currentPeriodStart,
+    current_period_end: currentPeriodEnd,
+    created: safeTimestamp(subscription.created) ?? Timestamp.now(),
     ended_at: safeTimestamp(subscription.ended_at),
     trial_start: safeTimestamp(subscription.trial_start),
     trial_end: safeTimestamp(subscription.trial_end),
