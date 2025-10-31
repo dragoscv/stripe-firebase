@@ -1,4 +1,16 @@
 ````markdown
+## Version 1.0.5 - 2025-10-31
+
+[fix] - Fixed subscription period dates extraction from Stripe API
+  - **Critical Fix**: Changed to extract `current_period_start` and `current_period_end` from subscription items (`subscription.items.data[0]`) instead of attempting to read from non-existent top-level subscription fields
+  - Previous code was trying to read `subscription.current_period_start` and `subscription.current_period_end` which don't exist in Stripe's API, causing the `??` operator to always fall back to `Timestamp.now()`
+  - This resulted in both period dates showing identical current timestamps instead of the actual billing period from Stripe
+  - Now correctly reads from `subscription.items.data[0].current_period_start` and `subscription.items.data[0].current_period_end` where these fields actually exist
+  - Verified all other timestamp fields are reading from correct sources:
+    - `created`: Top-level `subscription.created` ✓
+    - `cancel_at`, `canceled_at`, `ended_at`, `trial_start`, `trial_end`: All top-level subscription fields ✓
+  - Fixes issue where subscription billing periods were not accurately tracked in Firestore
+
 ## Version 1.0.4 - 2025-10-31
 
 [fix] - Fixed critical subscription period dates bug where current_period_start and current_period_end had identical values
