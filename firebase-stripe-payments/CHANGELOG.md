@@ -1,4 +1,10 @@
 ````markdown
+## Version 1.0.7 - 2025-10-31
+
+[chore] - Version bump
+  - No functional changes
+  - Reverted unsupported eventsConfig settings (Firebase Extensions does not support auto-enabling events checkbox)
+
 ## Version 1.0.6 - 2025-10-31
 
 [feature] - Auto-enable Eventarc events on installation
