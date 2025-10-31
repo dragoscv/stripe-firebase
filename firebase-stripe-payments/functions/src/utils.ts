@@ -186,12 +186,12 @@ export const manageSubscriptionStatusChange = async (
   const subsDbRef = customersSnap.docs[0].ref
     .collection('subscriptions')
     .doc(subscription.id);
-  
+
   // Extract period dates from subscription items (not top-level subscription object)
   const firstItem = subscription.items.data[0];
   const currentPeriodStart = safeTimestamp((firstItem as any).current_period_start) ?? Timestamp.now();
   const currentPeriodEnd = safeTimestamp((firstItem as any).current_period_end) ?? Timestamp.now();
-  
+
   // Update with new Subscription status
   const subscriptionData: Subscription = {
     metadata: subscription.metadata,
@@ -359,10 +359,10 @@ export const insertInvoiceRecord = async (invoice: Stripe.Invoice) => {
     // Handle new Stripe API structure: pricing.price_details or legacy price object
     const pricing = (item as any).pricing;
     const price = (item as any).price;
-    
+
     let productId: string | undefined;
     let priceId: string | undefined;
-    
+
     if (pricing?.price_details) {
       // New API structure (2025-08-27.basil+)
       productId = pricing.price_details.product;
@@ -372,7 +372,7 @@ export const insertInvoiceRecord = async (invoice: Stripe.Invoice) => {
       productId = typeof price.product === 'string' ? price.product : price.product?.id;
       priceId = price.id;
     }
-    
+
     if (productId && priceId) {
       prices.push(
         admin
@@ -425,10 +425,10 @@ export const insertPaymentRecord = async (
       // Handle new Stripe API structure: pricing.price_details or legacy price object
       const pricing = (item as any).pricing;
       const price = (item as any).price;
-      
+
       let productId: string | undefined;
       let priceId: string | undefined;
-      
+
       if (pricing?.price_details) {
         // New API structure (2025-08-27.basil+)
         productId = pricing.price_details.product;
@@ -438,7 +438,7 @@ export const insertPaymentRecord = async (
         productId = typeof price.product === 'string' ? price.product : price.product?.id;
         priceId = price.id;
       }
-      
+
       if (productId && priceId) {
         prices.push(
           admin

@@ -1,4 +1,13 @@
 ````markdown
+## Version 1.0.6 - 2025-10-31
+
+[feature] - Auto-enable webhook events on installation
+  - Added `lifecycleEvents` configuration to automatically enable Stripe webhook event forwarding during extension installation, update, and configuration
+  - All 26 Stripe webhook events are now automatically registered and enabled by default
+  - Events include: product, price, checkout session, customer subscription, tax rate, invoice, and payment intent events
+  - Ensures real-time synchronization between Stripe and Firestore without manual configuration
+  - Users no longer need to manually check the "Enable events" checkbox during installation
+
 ## Version 1.0.5 - 2025-10-31
 
 [fix] - Fixed subscription period dates extraction from Stripe API

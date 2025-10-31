@@ -13,7 +13,7 @@
 # limitations under the License.
 
 name: firebase-stripe-payments
-version: 1.0.5
+version: 1.0.6
 specVersion: v1beta
 
 displayName: Stripe Payments for Firebase
@@ -323,6 +323,17 @@ params:
       for more information.
     default: 0
     required: true
+
+lifecycleEvents:
+  onInstall:
+    function: handleWebhookEvents
+    processingMessage: Registering Stripe webhook events for real-time sync
+  onUpdate:
+    function: handleWebhookEvents
+    processingMessage: Updating Stripe webhook events configuration
+  onConfigure:
+    function: handleWebhookEvents
+    processingMessage: Configuring Stripe webhook events
 
 events:
   - type: com.stripe.v1.product.created
