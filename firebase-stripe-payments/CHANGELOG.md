@@ -1,6 +1,16 @@
 ````markdown
 ## Version 1.0.6 - 2025-10-31
 
+[feature] - Auto-enable Eventarc events on installation
+  - Added `eventsConfig` with `defaultEnabled: true` to automatically check the "Enable events" checkbox during extension installation
+  - All 24 Stripe webhook event types are now pre-selected by default
+  - Channel location automatically set to match the extension's Cloud Function location (${LOCATION})
+  - Events include: product, price, checkout session, customer subscription, tax rate, invoice, and payment intent events
+  - Users can still disable events or deselect specific event types if needed, but the default is now fully enabled
+  - Ensures out-of-the-box real-time event handling via Eventarc without manual configuration
+
+## Version 1.0.5 - 2025-10-31
+
 [feature] - Auto-enable webhook events on installation
   - Added `lifecycleEvents` configuration to automatically enable Stripe webhook event forwarding during extension installation, update, and configuration
   - All 26 Stripe webhook events are now automatically registered and enabled by default

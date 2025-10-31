@@ -324,16 +324,10 @@ params:
     default: 0
     required: true
 
-lifecycleEvents:
-  onInstall:
-    function: handleWebhookEvents
-    processingMessage: Registering Stripe webhook events for real-time sync
-  onUpdate:
-    function: handleWebhookEvents
-    processingMessage: Updating Stripe webhook events configuration
-  onConfigure:
-    function: handleWebhookEvents
-    processingMessage: Configuring Stripe webhook events
+eventsConfig:
+  channel:
+    location: ${LOCATION}
+  defaultEnabled: true
 
 events:
   - type: com.stripe.v1.product.created
