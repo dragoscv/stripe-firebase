@@ -1,4 +1,13 @@
 ````markdown
+## Version 1.0.4 - 2025-10-31
+
+[fix] - Fixed critical subscription period dates bug where current_period_start and current_period_end had identical values
+  - Changed from `||` (logical OR) to `??` (nullish coalescing) operator for timestamp fallbacks
+  - Previous behavior: `safeTimestamp() || Timestamp.now()` treated falsy values (including 0) as invalid, causing both fields to use Timestamp.now()
+  - New behavior: `safeTimestamp() ?? Timestamp.now()` only uses fallback for null/undefined, preserving valid timestamp values
+  - Fixes issue where yearly subscriptions showed identical start and end dates
+  - Ensures accurate subscription period tracking in Firestore
+
 ## Version 1.0.3 - 2025-10-30
 
 [fix] - Fixed critical invoice webhook handler errors: "Cannot read properties of undefined (reading 'product')"
