@@ -437,11 +437,9 @@ class FirestoreInvoiceDAO implements InvoiceDAO {
         onError?: (error: StripePaymentsError) => void,
         subscriptionId?: string
     ): () => void {
-        let invoicesRef: Query<Invoice>;
-
         if (subscriptionId) {
             // Listen to invoices for a specific subscription
-            invoicesRef = collection(
+            const invoicesRef = collection(
                 this.firestore,
                 this.customersCollection,
                 uid,
@@ -449,54 +447,133 @@ class FirestoreInvoiceDAO implements InvoiceDAO {
                 subscriptionId,
                 INVOICES_COLLECTION
             ).withConverter(INVOICE_CONVERTER);
-        } else {
-            // Listen to all invoices using collectionGroup for both customer-level and subscription-level invoices
-            const allInvoices = collectionGroup(this.firestore, INVOICES_COLLECTION)
-                .withConverter(INVOICE_CONVERTER);
-            
-            // Filter to only invoices under this customer's path
-            // This will match both customers/{uid}/invoices/* and customers/{uid}/subscriptions/*/invoices/*
-            invoicesRef = query(
-                allInvoices,
-                where("uid", "==", uid)
-            );
-        }
 
-        return onSnapshot(
-            invoicesRef,
-            (querySnap: QuerySnapshot<Invoice>) => {
-                const snapshot: InvoiceSnapshot = {
-                    invoices: [],
-                    changes: [],
-                    size: querySnap.size,
-                    empty: querySnap.empty,
-                };
-                querySnap.forEach((snap: QueryDocumentSnapshot<Invoice>) => {
-                    snapshot.invoices.push(snap.data());
-                });
-                querySnap.docChanges().forEach((change: DocumentChange<Invoice>) => {
-                    snapshot.changes.push({
-                        type: change.type,
-                        invoice: change.doc.data(),
+            return onSnapshot(
+                invoicesRef,
+                (querySnap: QuerySnapshot<Invoice>) => {
+                    const snapshot: InvoiceSnapshot = {
+                        invoices: [],
+                        changes: [],
+                        size: querySnap.size,
+                        empty: querySnap.empty,
+                    };
+                    querySnap.forEach((snap: QueryDocumentSnapshot<Invoice>) => {
+                        snapshot.invoices.push(snap.data());
                     });
-                });
+                    querySnap.docChanges().forEach((change: DocumentChange<Invoice>) => {
+                        snapshot.changes.push({
+                            type: change.type,
+                            invoice: change.doc.data(),
+                        });
+                    });
 
-                onUpdate(snapshot);
-            },
-            (err: FirestoreError) => {
-                if (onError) {
-                    const arg: StripePaymentsError = new StripePaymentsError(
-                        "internal",
-                        `Error while listening to database updates: ${err.message}`,
-                        err
-                    );
-                    onError(arg);
+                    onUpdate(snapshot);
+                },
+                (err: FirestoreError) => {
+                    if (onError) {
+                        const arg: StripePaymentsError = new StripePaymentsError(
+                            "internal",
+                            `Error while listening to database updates: ${err.message}`,
+                            err
+                        );
+                        onError(arg);
+                    }
                 }
-            }
-        );
-    }
+            );
+        } else {
+            // Listen to both customer-level and subscription-level invoices
+            // We need to set up two listeners and merge their results
 
-    private async getInvoiceSnapshotIfExists(
+            const customerPath = `${this.customersCollection}/${uid}/`;
+            const invoiceMap = new Map<string, Invoice>();
+            let unsubscribeCustomer: (() => void) | null = null;
+            let unsubscribeSubscriptions: (() => void) | null = null;
+
+            const emitSnapshot = () => {
+                const invoices = Array.from(invoiceMap.values());
+                const snapshot: InvoiceSnapshot = {
+                    invoices,
+                    changes: [], // Changes tracking is simplified for merged listeners
+                    size: invoices.length,
+                    empty: invoices.length === 0,
+                };
+                onUpdate(snapshot);
+            };
+
+            // Listen to customer-level invoices
+            const customerInvoicesRef = collection(
+                this.firestore,
+                this.customersCollection,
+                uid,
+                INVOICES_COLLECTION
+            ).withConverter(INVOICE_CONVERTER);
+
+            unsubscribeCustomer = onSnapshot(
+                customerInvoicesRef,
+                (querySnap: QuerySnapshot<Invoice>) => {
+                    querySnap.forEach((snap: QueryDocumentSnapshot<Invoice>) => {
+                        invoiceMap.set(snap.id, snap.data());
+                    });
+                    querySnap.docChanges().forEach((change: DocumentChange<Invoice>) => {
+                        if (change.type === 'removed') {
+                            invoiceMap.delete(change.doc.id);
+                        }
+                    });
+                    emitSnapshot();
+                },
+                (err: FirestoreError) => {
+                    if (onError) {
+                        const arg: StripePaymentsError = new StripePaymentsError(
+                            "internal",
+                            `Error while listening to customer invoices: ${err.message}`,
+                            err
+                        );
+                        onError(arg);
+                    }
+                }
+            );
+
+            // Listen to subscription-level invoices using collectionGroup
+            const subscriptionInvoicesRef = collectionGroup(
+                this.firestore,
+                INVOICES_COLLECTION
+            ).withConverter(INVOICE_CONVERTER);
+
+            unsubscribeSubscriptions = onSnapshot(
+                subscriptionInvoicesRef,
+                (querySnap: QuerySnapshot<Invoice>) => {
+                    querySnap.forEach((snap: QueryDocumentSnapshot<Invoice>) => {
+                        // Only include invoices under this customer's path
+                        if (snap.ref.path.startsWith(customerPath)) {
+                            invoiceMap.set(snap.id, snap.data());
+                        }
+                    });
+                    querySnap.docChanges().forEach((change: DocumentChange<Invoice>) => {
+                        if (change.type === 'removed' && change.doc.ref.path.startsWith(customerPath)) {
+                            invoiceMap.delete(change.doc.id);
+                        }
+                    });
+                    emitSnapshot();
+                },
+                (err: FirestoreError) => {
+                    if (onError) {
+                        const arg: StripePaymentsError = new StripePaymentsError(
+                            "internal",
+                            `Error while listening to subscription invoices: ${err.message}`,
+                            err
+                        );
+                        onError(arg);
+                    }
+                }
+            );
+
+            // Return a combined unsubscribe function
+            return () => {
+                if (unsubscribeCustomer) unsubscribeCustomer();
+                if (unsubscribeSubscriptions) unsubscribeSubscriptions();
+            };
+        }
+    } private async getInvoiceSnapshotIfExists(
         uid: string,
         invoiceId: string,
         subscriptionId?: string
@@ -543,11 +620,9 @@ class FirestoreInvoiceDAO implements InvoiceDAO {
         status?: InvoiceStatus[],
         subscriptionId?: string
     ): Promise<QuerySnapshot<Invoice>> {
-        let invoicesQuery: Query<Invoice>;
-
         if (subscriptionId) {
             // Get invoices for a specific subscription
-            invoicesQuery = collection(
+            let invoicesQuery: Query<Invoice> = collection(
                 this.firestore,
                 this.customersCollection,
                 uid,
@@ -555,28 +630,64 @@ class FirestoreInvoiceDAO implements InvoiceDAO {
                 subscriptionId,
                 INVOICES_COLLECTION
             ).withConverter(INVOICE_CONVERTER);
+
+            if (status) {
+                invoicesQuery = query(invoicesQuery, where("status", "in", status));
+            }
+
+            return await this.queryFirestore(() => getDocs(invoicesQuery));
         } else {
-            // Get all invoices from both customer-level and subscription-level
-            // Using collectionGroup to query across all invoice subcollections under this customer
-            const allInvoices = collectionGroup(this.firestore, INVOICES_COLLECTION)
+            // Get all invoices from both customer-level and subscription-level paths
+            // Since invoices are stored in two locations, we need to query both and merge
+
+            // Query customer-level invoices: customers/{uid}/invoices
+            let customerInvoicesQuery: Query<Invoice> = collection(
+                this.firestore,
+                this.customersCollection,
+                uid,
+                INVOICES_COLLECTION
+            ).withConverter(INVOICE_CONVERTER);
+
+            if (status) {
+                customerInvoicesQuery = query(customerInvoicesQuery, where("status", "in", status));
+            }
+
+            // Query subscription-level invoices: customers/{uid}/subscriptions/*/invoices/*
+            // Use collectionGroup filtered by path
+            const allInvoicesGroup = collectionGroup(this.firestore, INVOICES_COLLECTION)
                 .withConverter(INVOICE_CONVERTER);
-            
-            // Filter to only invoices under this customer's path
-            // This will match both customers/{uid}/invoices/* and customers/{uid}/subscriptions/*/invoices/*
-            invoicesQuery = query(
-                allInvoices,
-                where("uid", "==", uid)
+
+            // We can't filter collectionGroup by uid since it's not stored in the document
+            // So we'll filter results after retrieval
+            let subscriptionInvoicesQuery: Query<Invoice> = allInvoicesGroup;
+
+            if (status) {
+                subscriptionInvoicesQuery = query(subscriptionInvoicesQuery, where("status", "in", status));
+            }
+
+            // Execute both queries
+            const [customerSnap, subscriptionSnap] = await Promise.all([
+                this.queryFirestore(() => getDocs(customerInvoicesQuery)),
+                this.queryFirestore(() => getDocs(subscriptionInvoicesQuery))
+            ]);
+
+            // Filter subscription invoices to only include those under this customer's path
+            const customerPath = `${this.customersCollection}/${uid}/`;
+            const filteredSubscriptionDocs = subscriptionSnap.docs.filter(doc =>
+                doc.ref.path.startsWith(customerPath)
             );
+
+            // Merge the results into a single QuerySnapshot-like object
+            // We'll return the customer snapshot and manually add the subscription docs
+            // Since we can't create a real QuerySnapshot, we'll work around this
+            return {
+                ...customerSnap,
+                docs: [...customerSnap.docs, ...filteredSubscriptionDocs],
+                size: customerSnap.size + filteredSubscriptionDocs.length,
+                empty: customerSnap.empty && filteredSubscriptionDocs.length === 0
+            } as QuerySnapshot<Invoice>;
         }
-
-        if (status) {
-            invoicesQuery = query(invoicesQuery, where("status", "in", status));
-        }
-
-        return await this.queryFirestore(() => getDocs(invoicesQuery));
-    }
-
-    private async queryFirestore<T>(fn: () => Promise<T>): Promise<T> {
+    } private async queryFirestore<T>(fn: () => Promise<T>): Promise<T> {
         try {
             return await fn();
         } catch (error) {
