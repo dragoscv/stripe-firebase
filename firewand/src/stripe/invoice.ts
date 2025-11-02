@@ -451,10 +451,15 @@ class FirestoreInvoiceDAO implements InvoiceDAO {
             ).withConverter(INVOICE_CONVERTER);
         } else {
             // Listen to all invoices using collectionGroup for both customer-level and subscription-level invoices
+            const allInvoices = collectionGroup(this.firestore, INVOICES_COLLECTION)
+                .withConverter(INVOICE_CONVERTER);
+            
+            // Filter to only invoices under this customer's path
+            // This will match both customers/{uid}/invoices/* and customers/{uid}/subscriptions/*/invoices/*
             invoicesRef = query(
-                collectionGroup(this.firestore, INVOICES_COLLECTION),
-                where("customer", "==", `customers/${uid}`)
-            ).withConverter(INVOICE_CONVERTER);
+                allInvoices,
+                where("uid", "==", uid)
+            );
         }
 
         return onSnapshot(
@@ -552,11 +557,16 @@ class FirestoreInvoiceDAO implements InvoiceDAO {
             ).withConverter(INVOICE_CONVERTER);
         } else {
             // Get all invoices from both customer-level and subscription-level
-            // Using collectionGroup to query across all invoice subcollections
+            // Using collectionGroup to query across all invoice subcollections under this customer
+            const allInvoices = collectionGroup(this.firestore, INVOICES_COLLECTION)
+                .withConverter(INVOICE_CONVERTER);
+            
+            // Filter to only invoices under this customer's path
+            // This will match both customers/{uid}/invoices/* and customers/{uid}/subscriptions/*/invoices/*
             invoicesQuery = query(
-                collectionGroup(this.firestore, INVOICES_COLLECTION),
-                where("customer", "==", `customers/${uid}`)
-            ).withConverter(INVOICE_CONVERTER);
+                allInvoices,
+                where("uid", "==", uid)
+            );
         }
 
         if (status) {
