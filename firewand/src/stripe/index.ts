@@ -55,6 +55,19 @@ export type {
 } from "./payment";
 
 export {
+  getCurrentUserInvoice,
+  getCurrentUserInvoices,
+  onCurrentUserInvoiceUpdate
+} from "./invoice";
+export type {
+  GetInvoicesOptions,
+  Invoice,
+  InvoiceChangeType,
+  InvoiceSnapshot,
+  InvoiceStatus
+} from "./invoice";
+
+export {
   getPrice,
   getPrices,
   getProduct,
