@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.9] - 2025-01-23
+
+### Changed
+- Simplified invoice queries to only use `customers/{uid}/invoices` path (removed unnecessary dual-path complexity)
+- `subscriptionId` parameter now filters by `invoice.subscription` field instead of querying subscription subcollections
+- Removed collectionGroup queries for improved performance and maintainability
+- Implementation now matches `payment.ts` pattern for consistency
+
+### Fixed
+- Invoice query logic simplified from 140+ lines of dual-listener code to ~50 lines of single-path queries
+- More performant queries by avoiding unnecessary collectionGroup operations
+
 ## [0.6.8] - 2025-01-23
 
 ### Fixed
