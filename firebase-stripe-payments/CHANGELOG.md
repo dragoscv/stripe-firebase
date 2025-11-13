@@ -1,4 +1,11 @@
 ````markdown
+## Version 1.0.8 - 2025-11-14
+
+[fix] - Fixed webhook error when checkout session has no payment intent
+  - Added null check for `checkoutSession.payment_intent` before attempting to retrieve payment intent
+  - Prevents "Argument 'intent' must be a string, but got: null" error in checkout.session.completed webhook handler
+  - Fixes crash when checkout sessions complete without a payment intent (e.g., setup mode, certain payment flows)
+
 ## Version 1.0.7 - 2025-10-31
 
 [chore] - Version bump

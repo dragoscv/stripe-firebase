@@ -124,7 +124,8 @@ export const handleWebhookEvents = async (
               checkoutSession.customer as string,
               true,
             );
-          } else {
+          } else if (checkoutSession.payment_intent) {
+            // Only process payment if payment_intent exists (mode: 'payment')
             const paymentIntentId = checkoutSession.payment_intent as string;
             const paymentIntent =
               await stripe.paymentIntents.retrieve(paymentIntentId);
