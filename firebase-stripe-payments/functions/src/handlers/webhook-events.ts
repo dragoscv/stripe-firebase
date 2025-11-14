@@ -24,6 +24,7 @@ import {
   deleteProductOrPrice,
   insertInvoiceRecord,
   insertPaymentRecord,
+  insertCheckoutSessionRecord,
   insertPriceRecord,
   insertTaxRateRecord,
   manageSubscriptionStatusChange,
@@ -124,12 +125,18 @@ export const handleWebhookEvents = async (
               checkoutSession.customer as string,
               true,
             );
-          } else if (checkoutSession.payment_intent) {
-            // Only process payment if payment_intent exists (mode: 'payment')
-            const paymentIntentId = checkoutSession.payment_intent as string;
-            const paymentIntent =
-              await stripe.paymentIntents.retrieve(paymentIntentId);
-            await insertPaymentRecord(paymentIntent, checkoutSession);
+          } else if (checkoutSession.mode === 'payment') {
+            // Handle payment mode checkout sessions
+            if (checkoutSession.payment_intent) {
+              // Normal payment with payment intent
+              const paymentIntentId = checkoutSession.payment_intent as string;
+              const paymentIntent =
+                await stripe.paymentIntents.retrieve(paymentIntentId);
+              await insertPaymentRecord(paymentIntent, checkoutSession);
+            } else if (checkoutSession.payment_status === 'paid') {
+              // 100% discount checkout - create a synthetic payment record
+              await insertCheckoutSessionRecord(checkoutSession);
+            }
           }
           if (checkoutSession.tax_id_collection?.enabled) {
             const customersSnap = await admin

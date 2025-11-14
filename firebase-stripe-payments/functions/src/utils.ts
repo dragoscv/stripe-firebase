@@ -464,6 +464,82 @@ export const insertPaymentRecord = async (
 };
 
 /**
+ * Add a checkout session record to Cloud Firestore for zero-amount payments (100% discount).
+ */
+export const insertCheckoutSessionRecord = async (
+  checkoutSession: Stripe.Checkout.Session,
+) => {
+  // Get customer's UID from Firestore
+  const customersSnap = await admin
+    .firestore()
+    .collection(config.customersCollectionPath)
+    .where('stripeId', '==', checkoutSession.customer)
+    .get();
+  if (customersSnap.size !== 1) {
+    throw new Error('User not found!');
+  }
+
+  // Get line items from checkout session
+  const lineItems = await stripe.checkout.sessions.listLineItems(
+    checkoutSession.id,
+  );
+  const prices: admin.firestore.DocumentReference[] = [];
+  for (const item of lineItems.data) {
+    // Handle new Stripe API structure: pricing.price_details or legacy price object
+    const pricing = (item as any).pricing;
+    const price = (item as any).price;
+
+    let productId: string | undefined;
+    let priceId: string | undefined;
+
+    if (pricing?.price_details) {
+      // New API structure (2025-08-27.basil+)
+      productId = pricing.price_details.product;
+      priceId = pricing.price_details.price;
+    } else if (price) {
+      // Legacy API structure
+      productId = typeof price.product === 'string' ? price.product : price.product?.id;
+      priceId = price.id;
+    }
+
+    if (productId && priceId) {
+      prices.push(
+        admin
+          .firestore()
+          .collection(config.productsCollectionPath)
+          .doc(productId)
+          .collection('prices')
+          .doc(priceId),
+      );
+    } else {
+      console.warn(`Skipping checkout line item without product/price: ${item.id}`);
+    }
+  }
+
+  // Create a payment record from the checkout session
+  const paymentRecord = {
+    id: checkoutSession.id,
+    object: 'checkout.session',
+    amount: checkoutSession.amount_total || 0,
+    amount_received: checkoutSession.amount_total || 0,
+    currency: checkoutSession.currency || 'usd',
+    customer: checkoutSession.customer,
+    status: checkoutSession.payment_status,
+    created: checkoutSession.created,
+    prices,
+    items: lineItems.data,
+    metadata: checkoutSession.metadata || {},
+  };
+
+  // Write to payments subcollection on the customer doc
+  await customersSnap.docs[0].ref
+    .collection('payments')
+    .doc(checkoutSession.id)
+    .set(paymentRecord, { merge: true });
+  logs.firestoreDocCreated('payments', checkoutSession.id);
+};
+
+/**
  * Delete a product or price from Firestore.
  */
 export const deleteProductOrPrice = async (

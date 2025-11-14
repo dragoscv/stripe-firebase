@@ -1,4 +1,12 @@
 ````markdown
+## Version 1.0.9 - 2025-11-14
+
+[feature] - Store payment records for 100% discount checkouts
+  - Checkout sessions with 100% discounts (amount_total = 0) now create payment records
+  - Added `insertCheckoutSessionRecord` function to handle zero-amount payments
+  - Ensures complete purchase history even when no payment intent is created
+  - Payment records include line items, prices, and metadata from the checkout session
+
 ## Version 1.0.8 - 2025-11-14
 
 [fix] - Fixed webhook error when checkout session has no payment intent
