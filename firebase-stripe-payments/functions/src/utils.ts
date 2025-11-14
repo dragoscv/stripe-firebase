@@ -469,20 +469,33 @@ export const insertPaymentRecord = async (
 export const insertCheckoutSessionRecord = async (
   checkoutSession: Stripe.Checkout.Session,
 ) => {
+  console.log('insertCheckoutSessionRecord called with:', {
+    sessionId: checkoutSession.id,
+    customer: checkoutSession.customer,
+    amount_total: checkoutSession.amount_total,
+    payment_status: checkoutSession.payment_status
+  });
+
   // Get customer's UID from Firestore
   const customersSnap = await admin
     .firestore()
     .collection(config.customersCollectionPath)
     .where('stripeId', '==', checkoutSession.customer)
     .get();
+  
+  console.log(`Found ${customersSnap.size} customer(s) with stripeId: ${checkoutSession.customer}`);
+  
   if (customersSnap.size !== 1) {
     throw new Error('User not found!');
   }
 
   // Get line items from checkout session
+  console.log('Fetching line items for checkout session...');
   const lineItems = await stripe.checkout.sessions.listLineItems(
     checkoutSession.id,
   );
+  console.log(`Found ${lineItems.data.length} line item(s)`);
+  
   const prices: admin.firestore.DocumentReference[] = [];
   for (const item of lineItems.data) {
     // Handle new Stripe API structure: pricing.price_details or legacy price object
@@ -532,10 +545,16 @@ export const insertCheckoutSessionRecord = async (
   };
 
   // Write to payments subcollection on the customer doc
+  const customerDocId = customersSnap.docs[0].id;
+  const paymentPath = `${config.customersCollectionPath}/${customerDocId}/payments/${checkoutSession.id}`;
+  console.log(`Writing payment record to: ${paymentPath}`, paymentRecord);
+  
   await customersSnap.docs[0].ref
     .collection('payments')
     .doc(checkoutSession.id)
     .set(paymentRecord, { merge: true });
+  
+  console.log('Payment record successfully written');
   logs.firestoreDocCreated('payments', checkoutSession.id);
 };
 

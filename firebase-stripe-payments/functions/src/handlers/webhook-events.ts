@@ -135,7 +135,27 @@ export const handleWebhookEvents = async (
               await insertPaymentRecord(paymentIntent, checkoutSession);
             } else if (checkoutSession.payment_status === 'paid') {
               // 100% discount checkout - create a synthetic payment record
-              await insertCheckoutSessionRecord(checkoutSession);
+              console.log('Creating payment record for 100% discount checkout:', {
+                sessionId: checkoutSession.id,
+                customer: checkoutSession.customer,
+                amount: checkoutSession.amount_total,
+                status: checkoutSession.payment_status
+              });
+              try {
+                await insertCheckoutSessionRecord(checkoutSession);
+                console.log('Successfully created payment record for checkout session:', checkoutSession.id);
+              } catch (error) {
+                console.error('Failed to create payment record for 100% discount checkout:', error);
+                throw error;
+              }
+            } else {
+              console.warn('Skipping payment record creation - checkout session not in expected state:', {
+                sessionId: checkoutSession.id,
+                mode: checkoutSession.mode,
+                payment_status: checkoutSession.payment_status,
+                payment_intent: paymentIntentId,
+                amount_total: checkoutSession.amount_total
+              });
             }
           }
           if (checkoutSession.tax_id_collection?.enabled) {

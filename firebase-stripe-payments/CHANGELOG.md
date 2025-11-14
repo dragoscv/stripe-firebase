@@ -1,4 +1,12 @@
 ````markdown
+## Version 1.0.12 - 2025-11-14
+
+[debug] - Enhanced logging for 100% discount checkout payment record creation
+  - Added comprehensive logging throughout insertCheckoutSessionRecord function
+  - Enhanced error handling with detailed console output for debugging
+  - Added logging for customer lookup, line items retrieval, and Firestore write operations
+  - Added warning logs when payment record creation is skipped
+
 ## Version 1.0.11 - 2025-11-14
 
 [fix] - Stricter validation for payment_intent to prevent empty string errors
