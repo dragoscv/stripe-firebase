@@ -127,9 +127,9 @@ export const handleWebhookEvents = async (
             );
           } else if (checkoutSession.mode === 'payment') {
             // Handle payment mode checkout sessions
-            if (checkoutSession.payment_intent) {
+            const paymentIntentId = checkoutSession.payment_intent as string | null;
+            if (paymentIntentId && typeof paymentIntentId === 'string' && paymentIntentId.length > 0) {
               // Normal payment with payment intent
-              const paymentIntentId = checkoutSession.payment_intent as string;
               const paymentIntent =
                 await stripe.paymentIntents.retrieve(paymentIntentId);
               await insertPaymentRecord(paymentIntent, checkoutSession);

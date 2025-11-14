@@ -1,4 +1,11 @@
 ````markdown
+## Version 1.0.11 - 2025-11-14
+
+[fix] - Stricter validation for payment_intent to prevent empty string errors
+  - Added explicit type and length checks for payment_intent before Stripe API call
+  - Prevents errors when payment_intent is empty string or undefined
+  - Ensures only valid payment intent IDs are passed to Stripe API
+
 ## Version 1.0.10 - 2025-11-14
 
 [fix] - Republish v1.0.9 changes to ensure proper deployment
