@@ -1,4 +1,10 @@
 ````markdown
+## Version 1.0.10 - 2025-11-14
+
+[fix] - Republish v1.0.9 changes to ensure proper deployment
+  - Same fixes as v1.0.9: handles 100% discount checkouts and null payment_intent
+  - Forces fresh deployment of webhook handler code
+
 ## Version 1.0.9 - 2025-11-14
 
 [feature] - Store payment records for 100% discount checkouts
