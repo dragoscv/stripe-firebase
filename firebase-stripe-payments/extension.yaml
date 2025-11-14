@@ -13,7 +13,7 @@
 # limitations under the License.
 
 name: firebase-stripe-payments
-version: 1.0.12
+version: 1.0.13
 specVersion: v1beta
 
 displayName: Stripe Payments for Firebase

@@ -1,4 +1,12 @@
 ````markdown
+## Version 1.0.13 - 2025-11-14
+
+[fix] - Fixed async payment event handlers (checkout.session.async_payment_succeeded/failed)
+  - Applied same payment_intent validation to async payment events
+  - Added support for 100% discount checkouts in async payment flows
+  - Added comprehensive logging for async payment record creation
+  - Fixed "Argument 'intent' must be a string, but got: null" error in async handlers
+
 ## Version 1.0.12 - 2025-11-14
 
 [debug] - Enhanced logging for 100% discount checkout payment record creation

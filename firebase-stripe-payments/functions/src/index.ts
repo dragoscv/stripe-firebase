@@ -30,6 +30,7 @@ import {
   insertTaxRateRecord,
   insertInvoiceRecord,
   insertPaymentRecord,
+  insertCheckoutSessionRecord,
 } from './utils';
 import { handleCheckoutSessionCreation } from './handlers/checkout-session-creation';
 
@@ -223,11 +224,38 @@ export const handleWebhookEvents = functions.https.onRequest(
                 checkoutSession.customer as string,
                 true,
               );
-            } else {
-              const paymentIntentId = checkoutSession.payment_intent as string;
-              const paymentIntent =
-                await stripe.paymentIntents.retrieve(paymentIntentId);
-              await insertPaymentRecord(paymentIntent, checkoutSession);
+            } else if (checkoutSession.mode === 'payment') {
+              // Handle payment mode checkout sessions
+              const paymentIntentId = checkoutSession.payment_intent as string | null;
+              if (paymentIntentId && typeof paymentIntentId === 'string' && paymentIntentId.length > 0) {
+                // Normal payment with payment intent
+                const paymentIntent =
+                  await stripe.paymentIntents.retrieve(paymentIntentId);
+                await insertPaymentRecord(paymentIntent, checkoutSession);
+              } else if (checkoutSession.payment_status === 'paid') {
+                // 100% discount checkout - create a synthetic payment record
+                console.log('Creating payment record for 100% discount async checkout:', {
+                  sessionId: checkoutSession.id,
+                  customer: checkoutSession.customer,
+                  amount: checkoutSession.amount_total,
+                  status: checkoutSession.payment_status
+                });
+                try {
+                  await insertCheckoutSessionRecord(checkoutSession);
+                  console.log('Successfully created payment record for async checkout session:', checkoutSession.id);
+                } catch (error) {
+                  console.error('Failed to create payment record for 100% discount async checkout:', error);
+                  throw error;
+                }
+              } else {
+                console.warn('Skipping async payment record creation - checkout session not in expected state:', {
+                  sessionId: checkoutSession.id,
+                  mode: checkoutSession.mode,
+                  payment_status: checkoutSession.payment_status,
+                  payment_intent: paymentIntentId,
+                  amount_total: checkoutSession.amount_total
+                });
+              }
             }
             if (checkoutSession.tax_id_collection?.enabled) {
               const customersSnap = await admin
