@@ -1,4 +1,10 @@
 ````markdown
+## Version 1.0.14 - 2025-11-15
+
+[release] - Stable release with all fixes
+  - Same fixes as v1.0.13: Fixed async payment event handlers for 100% discount checkouts
+  - Published under codai-ro namespace for easier project management
+
 ## Version 1.0.13 - 2025-11-14
 
 [fix] - Fixed async payment event handlers (checkout.session.async_payment_succeeded/failed)
